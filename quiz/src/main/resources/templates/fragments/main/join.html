@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <main class="main">
+    <div class="inner">
+      <form action="/join" method="post" class="form" th:Object="${joinForm}">
+        <fieldset>
+          <legend>JOIN</legend>
+          <fieldset class="id_field">
+            <legend>ID</legend>
+            <input type="text" th:field="*{id}" autocomplete="off" />
+          </fieldset>
+          <fieldset class="password_field">
+            <legend>Password</legend>
+            <input type="password" th:field="*{password}" autocomplete="off" />
+          </fieldset>
+          <fieldset class="name_field">
+            <legend>Name</legend>
+            <input type="text" th:field="*{name}" autocomplete="off" />
+          </fieldset>
+          <button>Submit</button>
+        </fieldset>
+      </form>
+    </div>
+  </main>
+</html>

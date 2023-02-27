@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <th:block th:fragment="script">
+    <script src="/js/swiper-bundle.min.js"></script>
+    <script th:inline="javascript">
+      window.onload = () => {
+          const message = [[${session.message}]];
+          if(message !== null) {
+              swal(message);
+              fetch("/message_reset", {
+                method: "GET",
+              });
+          }
+          const navbarCheck = [[${session.navbarCheck}]];
+          if(navbarCheck != null){
+              const navbarInput = document.querySelectorAll("input[name='navbar_trigger']");
+              navbarInput[navbarCheck].checked = true;
+          }
+          const quizSetCheck = [[${session.quizSetCheck}]];
+          if(quizSetCheck != null){
+              const quizSetInput = document.querySelectorAll("input[name*='quiz_set_trigger']");
+              quizSetInput[quizSetCheck].checked = true;
+          }
+          journalBodyScrollToBottom()
+      }
+
+      function journalBodyScrollToBottom() {
+          const journalBody = document.querySelector(".journal_body");
+          journalBody.scrollTop = journalBody.scrollHeight
+      }
+      journalBodyScrollToBottom()
+      function setNavbar() {
+        const navbarLabel = document.querySelectorAll(
+          "label[for*='navbar_trigger']"
+        );
+        for (let i = 0; i < navbarLabel.length; i++) {
+          navbarLabel[i].addEventListener("click", (e) => {
+            fetch("/set_navbar/" + i, {
+              method: "GET",
+            });
+          });
+        }
+      }
+      setNavbar();
+
+      function setQuizSet() {
+        const quizSetLabel = document.querySelectorAll(
+          "label[for^='quiz_set_trigger']"
+        );
+        for (let i = 0; i < quizSetLabel.length; i++) {
+          quizSetLabel[i].addEventListener("click", (e) => {
+            fetch("/set_quiz_set/" + i, {
+              method: "GET",
+            });
+          });
+        }
+      }
+      setQuizSet();
+      function setQuizSwiper() {
+        const quizSwiperObject = {};
+        const swipers = document.querySelectorAll(".swiper");
+        for (let i = 0; i < swipers.length; i++) {
+          const swiper = new Swiper(".quiz_swiper" + i, {
+            cssMode: true,
+            pagination: {
+              el: ".swiper-pagination",
+              type: "fraction",
+            },
+          });
+          quizSwiperObject["quiz_swiper" + i] = swiper;
+        }
+        for (let swiperKey of Object.keys(quizSwiperObject)) {
+          const swiper = document.querySelector("." + swiperKey);
+          const answerCheck = swiper.querySelectorAll(".answer-check");
+          answerCheck.forEach((element, index) => {
+            const quizSetArticle = swiper.parentNode;
+            const gage = quizSetArticle.querySelector(
+              "input[id*='quiz_gage_pagination']"
+            );
+            const gageEventHandler = (e) => {
+              const value = e.target.value;
+              quizSwiperObject[swiperKey].slideTo(value, 0);
+            };
+            gage.addEventListener("mouseup", gageEventHandler);
+            gage.addEventListener("mousedown", gageEventHandler);
+            gage.addEventListener("mousemove", gageEventHandler);
+            gage.addEventListener("pointerup", gageEventHandler);
+            gage.addEventListener("pointerdown", gageEventHandler);
+            gage.addEventListener("pointermove", gageEventHandler);
+            gage.addEventListener("dragend", gageEventHandler);
+            gage.addEventListener("dragleave", gageEventHandler);
+
+            element.addEventListener("submit", (e) => {
+              e.preventDefault();
+              const slide = element.parentNode;
+              const answer = slide.querySelector("p").innerText;
+              const input = element.querySelector("input");
+              const submitAnswer = input.value;
+              input.value = "";
+              if (answer === submitAnswer) {
+                if (index + 1 < answerCheck.length) {
+                  quizSwiperObject[swiperKey].slideTo(index + 1, 0);
+                  const nextForm = answerCheck[index + 1];
+                  const nextInput = nextForm.querySelector("input");
+                  gage.value = Number(gage.value) + 1;
+                  const rightAside = document.querySelector(".right_aside");
+                  rightAside.innerHTML = '<h3 class="blind">right aside</h3>';
+                  nextInput.focus();
+                } else {
+                  alert("수고하셨습니다.");
+                  quizSwiperObject[swiperKey].slideTo(0, 0);
+                  const firstForm = answerCheck[0];
+                  const firstInput = firstForm.querySelector("input");
+                  gage.value = "0";
+                  firstInput.focus();
+                }
+              } else {
+                alert(` 정답은 '${answer}' 입니다.`);
+                fetch("/naver/search/encyc/" + answer, {
+                    method: "GET"
+                }).then((response) => response.json())
+                .then((data) => {
+                  const result = data.items[0];
+                  const rightAside = document.querySelector(".right_aside");
+                  const title = result.title;
+                  const thumbnail = result.thumbnail;
+                  let description = result.description.split("다.")[0];
+                  if(!description.includes('...')){
+                    description += "다."
+                  }
+                  const link =  result.link
+                  rightAside.innerHTML =
+                    `
+                      <h2 class="blind">right aside</h2>
+                      <article>
+                        <h3>${title}</h3>
+                        ${ thumbnail != "" ? `<figure><img src="${thumbnail}" alt="" /><figcaption class="blind">${answer + "이미지"}</figcaption></figure>` : ''}
+                        <p>${description}</p>
+                        <a href="${link}" target="_blank">link</a>
+                      </article>
+                    `
+                });
+
+                input.focus();
+              }
+            });
+          });
+        }
+      }
+      setQuizSwiper();
+
+      function journalSearchSelectHandler() {
+        const journalBody = document.querySelector(".journal_body");
+        const selectJournalYear = document.getElementById("journal_year");
+        const selectJournalMonth = document.getElementById("journal_month");
+        const selectJournalDate = document.getElementById("journal_date");
+        const selectJournalDay = document.getElementById("journal_day");
+        journalBody.querySelectorAll("li").forEach((li) => {
+          li.hidden = false;
+          if (selectJournalYear.value != "year") {
+            if (selectJournalYear.value != li.dataset.year) {
+              li.hidden = true;
+            }
+          }
+          if (selectJournalMonth.value != "month") {
+            if (selectJournalMonth.value != li.dataset.month) {
+              li.hidden = true;
+            }
+          }
+          if (selectJournalDate.value != "date") {
+            if (selectJournalDate.value != li.dataset.date) {
+              li.hidden = true;
+            }
+          }
+          if (selectJournalDay.value != "day") {
+            if (selectJournalDay.value != li.dataset.day) {
+              li.hidden = true;
+            }
+          }
+        });
+      }
+    </script>
+  </th:block>
+</html>

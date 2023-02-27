@@ -1,0 +1,98 @@
+@charset "UTF-8";
+
+@font-face {
+  src: url(/font/BMJUA_ttf.ttf);
+  font-family: "jua";
+}
+@font-face {
+  src: url(/font/NotoSansKR-Thin.otf);
+  font-family: "NotoSansKR-Thin";
+}
+@font-face {
+  src: url(/font/NotoSansKR-Light.otf);
+  font-family: "NotoSansKR-Light";
+}
+@font-face {
+  src: url(/font/NotoSansKR-Regular.otf);
+  font-family: "NotoSansKR-Regular";
+}
+@font-face {
+  src: url(/font/NotoSansKR-Medium.otf);
+  font-family: "NotoSansKR-Medium";
+}
+@font-face {
+  src: url(/font/NotoSansKR-Bold.otf);
+  font-family: "NotoSansKR-Bold";
+}
+@font-face {
+  src: url(/font/NotoSansKR-Black.otf);
+  font-family: "NotoSansKR-Black";
+}
+@font-face {
+  src: url(/font/나눔손글씨_성실체.ttf);
+  font-family: "나눔손글씨_성실체";
+}
+/* Global */
+
+* {
+  box-sizing: border-box;
+  font-family: "Noto Sans KR", sans-serif;
+}
+body {
+  color: #2f3640;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.blind {
+  overflow: hidden;
+  position: absolute;
+  clip-path: polygon(0 0, 0 0, 0 0, 0 0);
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+}
+
+.inner {
+  max-width: 1024px;
+  padding: 0 20px;
+  margin: auto;
+  height: 100%;
+}
+.inner::after {
+  content: "";
+  display: block;
+  width: 100%;
+  clear: both;
+}
+
+input[name*="quiz_set_trigger"] {
+  display: none;
+}
+
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  backdrop-filter: blur(4px);
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  mix-blend-mode: color-dodge;
+}
+
+.loading figure {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  height: 50%;
+  transform: translate(-50%, -50%);
+  background-image: url(/img/loading.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  filter: invert(1);
+}

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <main class="main">
+    <div class="inner">
+      <section class="todolist">
+        <h2 class="blind">todolist</h2>
+        <article class="finish">
+          <h3>finish</h3>
+          <ul>
+            <li
+              th:each="toDo : ${toDoList}"
+              th:if="${toDo.todoStatus.name() == 'FINISHED'}"
+            >
+              <span th:text="${toDo.sentence}">sentence</span>
+              <a th:href="@{'/toDo/return/' + ${toDo.id}}">RETURN</a>
+            </li>
+          </ul>
+        </article>
+        <article class="todo">
+          <h3>todo</h3>
+          <ul>
+            <li
+              th:each="toDo : ${toDoList}"
+              th:if="${toDo.todoStatus.name() == 'TODO'}"
+            >
+              <span th:text="${toDo.sentence}">sentence</span>
+              <a th:href="@{'/toDo/finish/' + ${toDo.id}}">FINISH</a>
+              <a th:href="@{'/toDo/delete/' + ${toDo.id}}">DELETE</a>
+            </li>
+          </ul>
+          <form action="/toDoList/add" method="post" th:Object="${toDoForm}">
+            <input type="text" th:field="*{sentence}" autocomplete="off" />
+            <button>➕</button>
+          </form>
+        </article>
+      </section>
+      <section class="quiz">
+        <h2 class="blind">quiz</h2>
+        <div class="quiz_swipper_container">
+          <article
+            class="quiz_swipper"
+            th:each="quizSet, info : ${quizSetList}"
+          >
+            <input
+              type="checkbox"
+              th:name="${'quiz_add_trigger' + quizSet.id}"
+              th:id="${'quiz_add_trigger' + quizSet.id}"
+            />
+            <article class="quiz_add">
+              <h3 class="blind">문제 추가하기</h3>
+              <form
+                th:action="@{'/quizSet/' + ${quizSet.id} + '/quiz/add'}"
+                method="post"
+                th:Object="${quizForm}"
+              >
+                <button>➕</button>
+                <input
+                  type="text"
+                  th:field="*{quiz}"
+                  placeholder="문제"
+                  autocomplete="off"
+                />
+                <input
+                  type="text"
+                  th:field="*{answer}"
+                  placeholder="답"
+                  autocomplete="off"
+                />
+              </form>
+              <label th:for="${'quiz_add_trigger' + quizSet.id }">▼</label>
+            </article>
+            <h3 class="blind" th:text="${quizSet.name}">quizSetName</h3>
+            <div th:class=" 'swiper ' + ${ 'quiz_swiper' + info.index}">
+              <div class="swiper-wrapper">
+                <div
+                  class="swiper-slide"
+                  th:each="quiz : ${quizSet.getQuizList()}"
+                >
+                  <a
+                    class="quiz_delete"
+                    th:href="@{'/quiz/delete/' + ${quiz.id}}"
+                    >×</a
+                  >
+                  <h4 th:text="${quiz.quiz}">문제</h4>
+                  <p class="blind" th:text="${quiz.answer}">답</p>
+                  <form class="answer-check">
+                    <input type="text" placeholder="답" autocomplete="off" />
+                    <button>❔</button>
+                  </form>
+                </div>
+              </div>
+              <div class="swiper-pagination"></div>
+            </div>
+            <input
+              type="range"
+              th:name=" 'quiz_gage_pagination' + ${quizSet.id}"
+              th:id=" 'quiz_gage_pagination' + ${quizSet.id}"
+              min="0"
+              th:max="${quizSet.getQuizList().size()-1}"
+              value="0"
+            />
+          </article>
+        </div>
+      </section>
+      <section class="journal">
+        <h2 class="blind">Journal</h2>
+        <input
+          type="checkbox"
+          name="add_journal_trigger"
+          id="add_journal_trigger"
+        />
+        <article class="add_journal">
+          <h3 class="blind">add_journal</h3>
+          <label for="add_journal_trigger">×</label>
+          <form action="/journal/add" method="post" th:Object="${journalForm}">
+            <input type="text" th:field="*{title}" placeholder="제목" />
+            <textarea
+              th:field="*{detail}"
+              cols="30"
+              rows="10"
+              placeholder="내용"
+            ></textarea>
+            <button>PUSH</button>
+          </form>
+        </article>
+        <ul class="journal_header">
+          <li>
+            <select
+              name="journal_year"
+              id="journal_year"
+              onchange="journalSearchSelectHandler()"
+            >
+              <option value="year">year</option>
+              <option value="test">test</option>
+              <option
+                th:each="year : ${yearList}"
+                th:value="${year}"
+                th:text="${year}"
+              >
+                year
+              </option>
+            </select>
+          </li>
+          <li>
+            <select
+              name="journal_month"
+              id="journal_month"
+              onchange="journalSearchSelectHandler()"
+            >
+              <option value="month">month</option>
+              <option value="test">test</option>
+              <option
+                th:each="month : ${monthList}"
+                th:value="${month}"
+                th:text="${month}"
+              >
+                month
+              </option>
+            </select>
+          </li>
+          <li>
+            <select
+              name="journal_date"
+              id="journal_date"
+              onchange="journalSearchSelectHandler()"
+            >
+              <option value="date">date</option>
+              <option value="test">test</option>
+              <option
+                th:each="date : ${dateList}"
+                th:value="${date}"
+                th:text="${date}"
+              >
+                date
+              </option>
+            </select>
+          </li>
+          <li>
+            <select
+              name="journal_day"
+              id="journal_day"
+              onchange="journalSearchSelectHandler()"
+            >
+              <option value="day">day</option>
+              <option value="test">test</option>
+              <option
+                th:each="day : ${dayList}"
+                th:value="${day}"
+                th:text="${day}"
+              >
+                day
+              </option>
+            </select>
+          </li>
+          <li>
+            <label class="add_journal_trigger" for="add_journal_trigger"
+              >Write</label
+            >
+          </li>
+        </ul>
+        <input
+          type="radio"
+          name="journal_detail_trigger"
+          id="journal_detail_trigger_close"
+        />
+        <ul class="journal_body">
+          <li
+            th:each="journal, info : ${journalList}"
+            th:attr="
+              data-year=${journal.getGeneratedYear()},
+              data-month=${journal.getGeneratedMonth()},
+              data-date=${journal.getGeneratedDate()},
+              data-day=${journal.getGeneratedDay()}"
+          >
+            <label th:for="${'journal_detail_trigger' + info.index}">
+              <time
+                th:datetime="${journal.generatedTime}"
+                th:text="${journal.getTimeText()}"
+                >0000년 00월 00일 0요일</time
+              >
+              <h3 th:text="${journal.title}">title</h3>
+              <a
+                class="journal_delete"
+                th:href="@{'/journal/delete/' + ${journal.id}}"
+                >×</a
+              >
+              <input
+                type="radio"
+                name="journal_detail_trigger"
+                th:id="${'journal_detail_trigger' + info.index}"
+              />
+              <label class="journal_detail" for="journal_detail_trigger_close">
+                <div class="inner">
+                  <time
+                    th:datetime="${journal.generatedTime}"
+                    th:text="${journal.getTimeText()}"
+                    >0000년 00월 00일 0요일</time
+                  >
+                  <h4 th:text="${journal.title}">title</h4>
+                  <p th:text="${journal.detail}">detail</p>
+                </div>
+              </label>
+            </label>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </main>
+</html>
